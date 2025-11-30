@@ -1,6 +1,6 @@
 namespace Finament.Application.Mapping;
 
-public class SettingMapping
+public static class SettingMapping
 {
     
 }

@@ -1,11 +1,9 @@
-namespace Finament.Application.DTOs.Categories;
+namespace Finament.Application.DTOs.Categories.Requests;
 
-public class CategoryResponseDto
+public class CreateCategoryDto
 {
-    public int Id { get; set; }
     public int UserId { get; set; }
     public string Name { get; set; } = "";
     public decimal MonthlyLimit { get; set; }
     public string Color { get; set; } = "";
-    public DateTime CreatedAt { get; set; }
 }

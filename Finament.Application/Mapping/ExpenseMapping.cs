@@ -1,6 +1,6 @@
 namespace Finament.Application.Mapping;
 
-public class ExpenseMapping
+public static class ExpenseMapping
 {
     
 }
