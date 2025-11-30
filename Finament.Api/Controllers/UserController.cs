@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Finament.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/users")]
 public class UserController : ControllerBase
 {
     private readonly FinamentDbContext _db;

@@ -9,9 +9,8 @@ public class FinamentDbContext : DbContext
     public FinamentDbContext(DbContextOptions<FinamentDbContext> options) : base(options) { }
     
     public DbSet<User> Users { get; set; }
-
     public DbSet<Category> Categories { get; set; }
-
+    public DbSet<Expense> Expenses { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -34,6 +33,17 @@ public class FinamentDbContext : DbContext
                             
         });
 
+        modelBuilder.Entity<Expense>(entity =>
+        {
+            entity.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.CategoryId).HasColumnName("category_id");
+            entity.Property(e => e.Amount).HasColumnName("amount");
+            entity.Property(e => e.Date).HasColumnName("date");
+            entity.Property(e => e.Tag).HasColumnName("tag");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+        });
+        
         base.OnModelCreating(modelBuilder);
     }
 }

@@ -7,7 +7,6 @@ namespace Finament.Api.Controllers;
 
 [ApiController]
 [Route("api/categories")]
-
 public class CategoryController : ControllerBase
 {
     private readonly FinamentDbContext _db;
