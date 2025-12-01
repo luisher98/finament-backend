@@ -1,7 +1,6 @@
 using Finament.Api.Persistence;
 using Finament.Application.DTOs.Users.Requests;
 using Finament.Application.Mapping;
-using Finament.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

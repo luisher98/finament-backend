@@ -1,4 +1,6 @@
 using Finament.Api.Persistence;
+using Finament.Application.DTOs.Expenses.Requests;
+using Finament.Application.Mapping;
 using Finament.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -23,44 +25,68 @@ public class ExpenseController : ControllerBase
             .Where(e => e.UserId == userId)
             .OrderByDescending(e => e.Date)
             .ToListAsync();
+        
+        var dtos = expenses.Select(ExpenseMapping.ToDto).ToList();
 
-        return Ok(expenses);
+        return Ok(dtos);
     }
     
     [HttpPost]
-    public async Task<IActionResult> Create(Expense expense)
+    public async Task<IActionResult> Create(CreateExpenseDto dto)
     {
-        // amount > 0
-        if (expense.Amount <= 0)
+        if (dto.Amount <= 0)
             return BadRequest(new { message = "Amount must be greater than zero." });
-
-        // category exists
-        var category = await _db.Categories.FindAsync(expense.CategoryId);
+        
+        var category = await _db.Categories.FindAsync(dto.CategoryId);
+        
         if (category == null)
             return BadRequest(new { message = "Category does not exist." });
-
-        // category belongs to user
-        if (category.UserId != expense.UserId)
-            return BadRequest(new { message = "Category does not belong to the user." });
-
-        // tag to camelCase
-        expense.Tag = ToCamelCase(expense.Tag);
-
-        // timestamp
-        expense.CreatedAt = DateTime.UtcNow;
         
-        // save
+        // category belongs to user
+        if (category.UserId != dto.UserId)
+            return BadRequest(new { message = "Category does not belong to the user." });
+        
+        dto.Tag = ToCamelCase(dto.Tag);
+        
+        var expense = ExpenseMapping.ToEntity(dto);
+        
         _db.Expenses.Add(expense);
         await _db.SaveChangesAsync();
+        
+        return Ok(ExpenseMapping.ToDto(expense));
+    }
+    
+    
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(int id, UpdateExpenseDto dto)
+    {
+        var expense = await _db.Expenses.FindAsync(id);
+        if (expense == null)
+            return NotFound(new { message = "Expense not found." });
 
-        return Ok(expense);
+        if (dto.CategoryId.HasValue)
+        {
+            var category = await _db.Categories.FindAsync(dto.CategoryId.Value);
+            if (category == null)
+                return BadRequest(new { message = "Category does not exist." });
+
+            if (category.UserId != expense.UserId)
+                return BadRequest(new { message = "Category does not belong to this user." });
+        }
+
+        if (dto.Tag != null)
+            dto.Tag = ToCamelCase(dto.Tag);
+
+        ExpenseMapping.UpdateEntity(expense, dto);
+
+        await _db.SaveChangesAsync();
+        return Ok(ExpenseMapping.ToDto(expense));
     }
     
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
         var expense = await _db.Expenses.FindAsync(id);
-
         if (expense == null)
             return NotFound(new { message = "Expense not found." });
         

@@ -1,8 +1,7 @@
-namespace Finament.Application.DTOs.Settings;
+namespace Finament.Application.DTOs.Settings.Requests;
 
-public class SettingResponseDto
+public class UpsertSettingDto
 {
-    public int Id { get; set; }
     public int UserId { get; set; }
     public string Currency { get; set; } = string.Empty;
     public int CycleStartDay { get; set; }

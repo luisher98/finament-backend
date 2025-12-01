@@ -1,4 +1,6 @@
 using Finament.Api.Persistence;
+using Finament.Application.DTOs.Categories.Requests;
+using Finament.Application.Mapping;
 using Finament.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -21,57 +23,54 @@ public class CategoryController : ControllerBase
     {
         var categories = await _db.Categories
             .Where(c => c.UserId == userId)
+            .OrderBy(c => c.Name)
             .ToListAsync();
 
-        return Ok(categories);
+        var dtos = categories.Select(CategoryMapping.ToDto).ToList();
+        return Ok(dtos);
     }
     
     [HttpPost]
-    public async Task<IActionResult> Create(Category category)
+    public async Task<IActionResult> Create(CreateCategoryDto dto)
     {
-        if (string.IsNullOrWhiteSpace(category.Name))
+        if (string.IsNullOrWhiteSpace(dto.Name))
             return BadRequest(new { message = "Name is required." });
         
         var duplicate = await _db.Categories
-            .AnyAsync(c => c.UserId == category.UserId && c.Name == category.Name);
+            .AnyAsync(c => c.UserId == dto.UserId && c.Name == dto.Name);
+        
         if (duplicate)
             return Conflict(new { message = "Category name already exists for this user." });
+
+        var category = CategoryMapping.ToEntity(dto); 
         
         _db.Categories.Add(category);
         await _db.SaveChangesAsync();
 
-        return Ok(category);
+        return Ok(CategoryMapping.ToDto(category));
     }
     
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, Category updatedCategory)
+    public async Task<IActionResult> Update(int id, UpdateCategoryDto dto)
     {
         var category = await _db.Categories.FindAsync(id);
         if (category == null)
             return NotFound(new { message = "Category not found." });
         
-        if (updatedCategory.UserId != category.UserId)
-            return BadRequest(new { message = "UserId mismatch." });
-        
-        if (string.IsNullOrWhiteSpace(updatedCategory.Name))
-            return BadRequest(new { message = "Name is required." });
-        
-        bool duplicate = await _db.Categories
-            .AnyAsync(c =>
-                c.UserId == category.UserId &&
-                c.Name == updatedCategory.Name &&
-                c.Id != id);
+        if (dto.Name != null)
+        {
+            var duplicate = await _db.Categories
+                .AnyAsync(c => c.UserId == category.UserId && c.Name == dto.Name && c.Id != id);
 
-        if (duplicate)
-            return Conflict(new { message = "Category name already exists for this user." });
-        
-        category.Name = updatedCategory.Name;
-        category.MonthlyLimit = updatedCategory.MonthlyLimit;
-        category.Color = updatedCategory.Color;
+            if (duplicate)
+                return Conflict(new { message = "Category name already exists for this user." });
+        }
+
+        CategoryMapping.UpdateEntity(category, dto);
 
         await _db.SaveChangesAsync();
 
-        return Ok(category);
+        return Ok(CategoryMapping.ToDto(category));
     }
 
     [HttpDelete("{id}")]
