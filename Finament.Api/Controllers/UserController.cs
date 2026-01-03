@@ -1,8 +1,6 @@
 using Finament.Application.DTOs.Users.Requests;
-using Finament.Application.Mapping;
-using Finament.Infrastructure.Persistence;
+using Finament.Application.Services.User;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Finament.Api.Controllers;
 
@@ -10,87 +8,45 @@ namespace Finament.Api.Controllers;
 [Route("api/users")]
 public class UserController : ControllerBase
 {
-    private readonly FinamentDbContext _db;
+    private readonly IUserService _service;
 
-    public UserController(FinamentDbContext db)
+    public UserController(IUserService service)
     {
-        _db = db;
+        _service = service;
     }
-    
-    // GET: api/users
+
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var users = await _db.Users.ToListAsync();
-        var dto = users.Select(UserMapping.ToDto).ToList();
-        return Ok(dto);
+        var result = await _service.GetAllAsync();
+        return Ok(result);
     }
 
-    // GET: api/users/{id}
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var user = await _db.Users.FindAsync(id);
-
-        if (user == null)
-            return NotFound();
-        
-        var dto = UserMapping.ToDto(user);
-
-        return Ok(dto);
+        var result = await _service.GetByIdAsync(id);
+        return Ok(result);
     }
-    
-    // POST: api/users
+
     [HttpPost]
     public async Task<IActionResult> Create(CreateUserDto dto)
     {
-        var user = UserMapping.ToEntity(dto, null);
-
-        _db.Users.Add(user);
-        await _db.SaveChangesAsync();
-
-        return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
+        var result = await _service.CreateAsync(dto);
+        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
-    // PUT: api/users/{id}
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, UpdateUserDto dto)
     {
-        var user = await _db.Users.FindAsync(id);
-
-        if (user == null)
-            return NotFound();
-
-        // is email duplicated
-        if (dto.Email != null)
-        {
-            var duplicate = await _db.Users
-                .AnyAsync(u => u.Email == dto.Email && u.Id != id);
-
-            if (duplicate)
-                return Conflict(new { message = "Email already exists." });
-        }
-        
-        UserMapping.UpdateEntity(user, dto);
-
-        _db.Users.Update(user);
-        await _db.SaveChangesAsync();
-
-        return Ok(user);
+        var result = await _service.UpdateAsync(id, dto);
+        return Ok(result);
     }
-    
-    // DELETE: api/users/{id}
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var user = await _db.Users.FindAsync(id);
-
-        if (user == null)
-            return NotFound();
-
-        _db.Users.Remove(user);
-        await _db.SaveChangesAsync();
-
+        await _service.DeleteAsync(id);
         return NoContent();
     }
 }
