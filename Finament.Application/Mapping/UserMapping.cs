@@ -13,7 +13,6 @@ public static class UserMapping
             Id = user.Id,
             Name = user.Name,
             Email = user.Email,
-            CreatedAt = user.CreatedAt
         };
     }
 
@@ -23,7 +22,7 @@ public static class UserMapping
         {
             Name = dto.Name,
             Email = dto.Email,
-            // PasswordHash = passwordHash,
+            PasswordHash = passwordHash,
             CreatedAt = DateTime.UtcNow
         };
     }

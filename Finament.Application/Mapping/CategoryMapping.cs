@@ -19,11 +19,11 @@ public static class CategoryMapping
         };
     }
 
-    public static Category ToEntity(CreateCategoryDto dto)
+    public static Category ToEntity(CreateCategoryDto dto, int userId)
     {
         return new Category
         {
-            UserId = dto.UserId,
+            UserId = userId,
             Name = dto.Name,
             MonthlyLimit = dto.MonthlyLimit,
             Color = dto.Color,

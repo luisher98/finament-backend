@@ -31,19 +31,19 @@ public sealed class CategoryService : ICategoryService
         return categories.Select(CategoryMapping.ToDto).ToList();
     }
     
-    public async Task<CategoryResponseDto> CreateAsync(CreateCategoryDto dto)
+    public async Task<CategoryResponseDto> CreateAsync(int userId, CreateCategoryDto dto)
     {
         NormalizeAndValidate(dto);
 
         var duplicate = await _db.Categories
-            .AnyAsync(c => c.UserId == dto.UserId && c.Name == dto.Name);
+            .AnyAsync(c => c.UserId == userId && c.Name == dto.Name);
 
         if (duplicate)
             throw new BusinessRuleException(
                 "Category name already exists for this user."
             );
 
-        var category = CategoryMapping.ToEntity(dto);
+        var category = CategoryMapping.ToEntity(dto, userId);
 
         _db.Categories.Add(category);
         await _db.SaveChangesAsync();
@@ -51,7 +51,7 @@ public sealed class CategoryService : ICategoryService
         return CategoryMapping.ToDto(category);
     }
     
-    public async Task<CategoryResponseDto> UpdateAsync(int id, UpdateCategoryDto dto)
+    public async Task<CategoryResponseDto> UpdateAsync(int userId, int id, UpdateCategoryDto dto)
     {
         var category = await _db.Categories.FindAsync(id);
         if (category == null)

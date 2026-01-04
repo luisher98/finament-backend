@@ -20,11 +20,11 @@ public static class ExpenseMapping
         };
     }
 
-    public static Expense ToEntity(CreateExpenseDto dto)
+    public static Expense ToEntity(CreateExpenseDto dto, int userId)
     {
         return new Expense
         {
-            UserId = dto.UserId,
+            UserId = userId,
             CategoryId = dto.CategoryId,
             Amount = dto.Amount,
             Date = dto.Date,

@@ -26,11 +26,11 @@ public sealed class ExpenseService : IExpenseService
         return expenses.Select(ExpenseMapping.ToDto).ToList();
     }
 
-    public async Task<ExpenseResponseDto> CreateAsync(CreateExpenseDto dto)
+    public async Task<ExpenseResponseDto> CreateAsync(int userId, CreateExpenseDto dto)
     {
-        await NormalizeAndValidateAsync(dto.UserId, dto);
+        await NormalizeAndValidateAsync(userId, dto);
 
-        var expense = ExpenseMapping.ToEntity(dto);
+        var expense = ExpenseMapping.ToEntity(dto, userId);
 
         _db.Expenses.Add(expense);
         await _db.SaveChangesAsync();
@@ -38,13 +38,13 @@ public sealed class ExpenseService : IExpenseService
         return ExpenseMapping.ToDto(expense);
     }
 
-    public async Task<ExpenseResponseDto> UpdateAsync(int id, UpdateExpenseDto dto)
+    public async Task<ExpenseResponseDto> UpdateAsync(int userId, int id, UpdateExpenseDto dto)
     {
         var expense = await _db.Expenses.FindAsync(id);
         if (expense == null)
             throw new NotFoundException("Expense not found.");
 
-        await NormalizeAndValidateAsync(expense.UserId, dto);
+        await NormalizeAndValidateAsync(userId, dto);
 
         ExpenseMapping.UpdateEntity(expense, dto);
         await _db.SaveChangesAsync();

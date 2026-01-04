@@ -1,12 +1,12 @@
 using Finament.Application.Infrastructure;
 using Microsoft.EntityFrameworkCore;
-
-namespace Finament.Application.Services.Settings;
-
-using Exceptions;
-using Mapping;
 using Finament.Application.DTOs.Settings.Requests;
 using Finament.Application.DTOs.Settings;
+using Finament.Application.Exceptions;
+using Finament.Application.Mapping;
+using ValidationException = System.ComponentModel.DataAnnotations.ValidationException;
+
+namespace Finament.Application.Services.Setting;
 
 public sealed class SettingService : ISettingService
 {
@@ -26,7 +26,7 @@ public sealed class SettingService : ISettingService
             : SettingMapping.ToDto(settings);
     }
 
-    public async Task<SettingResponseDto> UpsertAsync(UpsertSettingDto dto)
+    public async Task<SettingResponseDto> UpsertAsync(int userId, UpsertSettingDto dto)
     {
         // CURRENCY
         if (string.IsNullOrWhiteSpace(dto.Currency))
@@ -40,18 +40,18 @@ public sealed class SettingService : ISettingService
 
         // USER EXISTS
         var userExists = await _db.Users
-            .AnyAsync(u => u.Id == dto.UserId);
+            .AnyAsync(u => u.Id == userId);
 
         if (!userExists)
             throw new NotFoundException("User does not exist.");
 
         // UPSERT
         var settings = await _db.Settings
-            .FirstOrDefaultAsync(s => s.UserId == dto.UserId);
+            .FirstOrDefaultAsync(s => s.UserId == userId);
 
         if (settings == null)
         {
-            settings = SettingMapping.Create(dto);
+            settings = SettingMapping.Create(userId, dto);
             _db.Settings.Add(settings);
         }
         else

@@ -6,7 +6,7 @@ namespace Finament.Application.Services.Category;
 public interface ICategoryService
 {
     Task<IReadOnlyList<CategoryResponseDto>> GetByUserAsync(int userId);
-    Task<CategoryResponseDto> CreateAsync(CreateCategoryDto dto);
-    Task<CategoryResponseDto> UpdateAsync(int id, UpdateCategoryDto dto);
+    Task<CategoryResponseDto> CreateAsync(int userId, CreateCategoryDto dto);
+    Task<CategoryResponseDto> UpdateAsync(int userId, int id, UpdateCategoryDto dto);
     Task DeleteAsync(int id);
 }

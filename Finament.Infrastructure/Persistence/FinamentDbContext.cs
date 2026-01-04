@@ -21,6 +21,7 @@ public class FinamentDbContext : DbContext, IFinamentDbContext
             entity.Property(e => e.Name).HasColumnName("name");
             entity.Property(e => e.Email).HasColumnName("email");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.PasswordHash).HasColumnName("password_hash");
         });
         
         modelBuilder.Entity<Category>(entity =>

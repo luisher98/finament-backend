@@ -9,4 +9,7 @@ public class User
     public string Email { get; set; } = "...";
     
     public DateTime CreatedAt { get; set; }
+    
+    public string PasswordHash { get; set; } = string.Empty;
+
 }

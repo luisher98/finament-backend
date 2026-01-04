@@ -30,7 +30,7 @@ public sealed class UserService : IUserService
             throw new NotFoundException("User not found.");
 
         return UserMapping.ToDto(user);
-    }    
+    } 
     
     public async Task<UserResponseDto> CreateAsync(CreateUserDto dto)
     {

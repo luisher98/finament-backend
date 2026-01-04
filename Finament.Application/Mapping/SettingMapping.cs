@@ -17,11 +17,11 @@ public static class SettingMapping
         };
     }
 
-    public static Setting Create(UpsertSettingDto dto)
+    public static Setting Create(int userId, UpsertSettingDto dto)
     {
         return new Setting
         {
-            UserId = dto.UserId,
+            UserId = userId,
             Currency = dto.Currency,
             CycleStartDay = dto.CycleStartDay,
         };
